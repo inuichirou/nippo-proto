@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>インジェクション作業日報</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=BIZ+UDPGothic:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&display=swap">
+<style>
+/* Layout: phone-first app shell. Folder-green header, one scrolling column of ruled form
+   sections with vertical labels like the paper form, a fixed register bar, bottom tabs. */
+:root {
+  --bg: #f3f6f4;
+  --surface: #ffffff;
+  --folder: #d6e8dc;
+  --tint: #ebf2ed;
+  --ink: #1a2420;
+  --muted: #55635c;
+  --line: #d5dfd8;
+  --rule: #97ab9e;
+  --accent: #2b6548;
+  --accent-ink: #ffffff;
+  --accent-soft: #d4e7db;
+  --bar: #2a7f50;
+  --mark: #f7e287;
+  --mark-ink: #3d3200;
+  --warn: #8a4f00;
+  --warn-soft: #fbe7c6;
+  --bad: #a6241d;
+  --bad-soft: #f8d9d5;
+  --scrim: rgba(14, 26, 20, 0.45);
+  --lift: 0 12px 32px rgba(16, 36, 26, 0.18);
+  --font-body: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --font-num: "BIZ UDGothic", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --font-display: "BIZ UDPMincho", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  --tab-h: 58px;
+  --reg-h: 66px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1411;
+    --surface: #161d19;
+    --folder: #1a2920;
+    --tint: #1c2621;
+    --ink: #e1e9e4;
+    --muted: #9aa8a0;
+    --line: #29342e;
+    --rule: #4c6054;
+    --accent: #7cc9a2;
+    --accent-ink: #0b1510;
+    --accent-soft: #213a2d;
+    --bar: #38a26e;
+    --mark: #5c4c12;
+    --mark-ink: #fbe9a2;
+    --warn: #f2b864;
+    --warn-soft: #3b2b0f;
+    --bad: #ff8f86;
+    --bad-soft: #3f1a17;
+    --scrim: rgba(0, 0, 0, 0.62);
+    --lift: 0 12px 32px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1411;
+  --surface: #161d19;
+  --folder: #1a2920;
+  --tint: #1c2621;
+  --ink: #e1e9e4;
+  --muted: #9aa8a0;
+  --line: #29342e;
+  --rule: #4c6054;
+  --accent: #7cc9a2;
+  --accent-ink: #0b1510;
+  --accent-soft: #213a2d;
+  --bar: #38a26e;
+  --mark: #5c4c12;
+  --mark-ink: #fbe9a2;
+  --warn: #f2b864;
+  --warn-soft: #3b2b0f;
+  --bad: #ff8f86;
+  --bad-soft: #3f1a17;
+  --scrim: rgba(0, 0, 0, 0.62);
+  --lift: 0 12px 32px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+html.locked, html.locked body { overflow: hidden; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wrap { width: 100%; max-width: 560px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---- header ---- */
+.appbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--folder); border-bottom: 1px solid var(--rule); }
+.appbar-in { display: flex; align-items: center; gap: 8px; padding-block: 10px; }
+.titlebox { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; row-gap: 2px; }
+.title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 17px; line-height: 1.35; letter-spacing: 0.14em; text-wrap: balance; }
+.badge { font-size: 11px; line-height: 1.7; color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 0 8px; letter-spacing: 0.04em; white-space: nowrap; }
+.icon-btn { flex: none; display: inline-grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--ink); cursor: pointer; }
+.icon-btn:hover { background: var(--tint); }
+.icon-btn svg { width: 20px; height: 20px; }
+.icon-btn.sm { width: 36px; height: 36px; }
+.icon-btn.sm svg { width: 18px; height: 18px; }
+
+/* ---- main ---- */
+main { padding-block: 14px calc(var(--tab-h) + var(--reg-h) + 32px + env(safe-area-inset-bottom, 0px)); }
+body.no-reg main { padding-bottom: calc(var(--tab-h) + 28px + env(safe-area-inset-bottom, 0px)); }
+.view { display: grid; gap: 14px; }
+.view > * { min-width: 0; }
+.hint { margin: 0; display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.55; color: var(--muted); }
+.hint svg { flex: none; width: 18px; height: 18px; margin-top: 2px; color: var(--accent); }
+.meta { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 10px; }
+.field, .fld, .mini { display: grid; gap: 4px; min-width: 0; }
+.flabel, .fld > span, .mini > span:first-child { font-size: 12px; line-height: 1.3; color: var(--muted); letter-spacing: 0.04em; }
+.txt, select, input[type="date"], input[type="search"], textarea { width: 100%; min-width: 0; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); color: var(--ink); font-size: 16px; }
+.txt, select, input[type="date"], input[type="search"] { height: 44px; padding: 0 10px; }
+input[type="search"] { -webkit-appearance: none; appearance: none; }
+textarea { min-height: 64px; padding: 8px 10px; line-height: 1.5; resize: vertical; }
+::placeholder { color: var(--rule); opacity: 1; }
+
+/* ---- paper-style sections ---- */
+.formsec { display: grid; grid-template-columns: 30px minmax(0, 1fr); background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; }
+.vlabel { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35em; padding-block: 14px; background: var(--tint); border-right: 1px solid var(--rule); border-radius: 3px 0 0 3px; font-family: var(--font-display); font-size: 15px; line-height: 1.1; color: var(--ink); user-select: none; }
+.vlabel span { display: block; }
+.secbody { min-width: 0; padding: 12px; display: grid; gap: 12px; }
+
+.blocks { display: grid; gap: 14px; }
+.block { display: grid; gap: 10px; }
+.block + .block { border-top: 1px dashed var(--rule); padding-top: 14px; }
+.block-head { display: flex; align-items: center; gap: 8px; }
+.bno { flex: none; width: 22px; text-align: center; font: 700 17px/1 var(--font-num); color: var(--accent); }
+.block-head select { flex: 1; }
+.colorpick { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 50px; padding: 6px 12px 6px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); text-align: left; cursor: pointer; }
+.colorpick:hover { background: var(--tint); }
+.colorpick .cname { font-weight: 700; font-size: 17px; line-height: 1.2; }
+.colorpick .ccode { font: 400 13px/1 var(--font-num); color: var(--muted); }
+.colorpick .cchg { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.colorpick.unset { border-style: dashed; }
+.colorpick.unset .cname { color: var(--accent); }
+.chip { flex: none; display: inline-block; width: 22px; height: 22px; border-radius: 50%; background: var(--c, transparent); border: 1px solid var(--rule); }
+.chip.lg { width: 30px; height: 30px; }
+.colorpick.unset .chip { border-style: dashed; }
+.row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.unit { position: relative; display: block; }
+.unit .txt { padding-right: 36px; text-align: right; font-family: var(--font-num); }
+.unit em { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 13px; color: var(--muted); pointer-events: none; }
+
+.sizegrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; background: var(--surface); }
+.scell { display: grid; grid-template-rows: auto 1fr; min-width: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.scell:nth-child(4n) { border-right: 0; }
+.scell:nth-child(n + 5) { border-bottom: 0; }
+.slabel { padding: 3px 0 2px; text-align: center; background: var(--tint); font: 700 13px/1.2 var(--font-num); color: var(--muted); }
+.slabel small { font-size: 10px; font-weight: 400; margin-left: 1px; }
+.scell input { width: 100%; min-width: 0; height: 46px; border: 0; border-radius: 0; background: var(--surface); text-align: center; font: 700 20px/1 var(--font-num); color: var(--ink); }
+.scell input:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.block-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 10px; }
+.qnote { font-size: 12px; color: var(--muted); }
+.q { display: inline-block; font-size: 11px; line-height: 1.5; font-weight: 700; color: var(--warn); border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-right: 4px; }
+.btotal { margin-left: auto; font-size: 14px; color: var(--muted); }
+.btotal b { font: 700 21px/1 var(--font-body); color: var(--ink); margin: 0 3px; }
+
+.subhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-weight: 700; font-size: 15px; }
+.subhead small { font-weight: 400; font-size: 12px; color: var(--muted); }
+.drows { display: grid; gap: 8px; }
+.drow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px 6px; align-items: end; padding: 8px; background: var(--tint); border-radius: 6px; }
+.drow .s1 { grid-column: span 1; justify-self: end; }
+.drow .s2 { grid-column: span 2; }
+.drow .s3 { grid-column: span 3; }
+.drow .s5 { grid-column: span 5; }
+.lr .txt { text-align: center; font: 700 18px/1 var(--font-num); padding: 0 4px; }
+.empty-note { margin: 0; font-size: 13px; color: var(--muted); }
+.addbtn { width: 100%; min-height: 44px; border: 1px dashed var(--rule); border-radius: 6px; background: transparent; color: var(--accent); font-weight: 700; font-size: 15px; cursor: pointer; }
+.addbtn:hover { background: var(--tint); }
+.addbtn.sm { min-height: 40px; font-size: 14px; }
+
+.ccrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ccrow .lbl { font-weight: 700; }
+.stepper { display: inline-flex; align-items: stretch; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.stepper button { width: 48px; height: 44px; border: 0; background: transparent; font-size: 22px; line-height: 1; cursor: pointer; }
+.stepper button:hover { background: var(--tint); }
+.stepper output { min-width: 46px; display: grid; place-items: center; border-inline: 1px solid var(--line); font: 700 20px/1 var(--font-num); }
+
+/* ---- register bar & tabs ---- */
+.regbar { position: fixed; left: 0; right: 0; bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px)); z-index: 15; background: var(--surface); border-top: 1px solid var(--rule); }
+.regbar-in { display: flex; align-items: center; gap: 12px; padding-block: 8px; }
+.regsum { flex: 1; min-width: 0; display: grid; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.regsum b { font-weight: 700; font-size: 16px; color: var(--ink); margin: 0 2px; }
+.regerr { margin: 0; padding-top: 8px; font-size: 13px; font-weight: 700; color: var(--bad); }
+.primary { min-height: 48px; padding: 0 20px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 16px; letter-spacing: 0.04em; white-space: nowrap; cursor: pointer; }
+.primary:hover { filter: brightness(1.06); }
+.primary:active { transform: translateY(1px); }
+.ghost { min-height: 48px; padding: 0 16px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); font-weight: 700; font-size: 15px; cursor: pointer; }
+.ghost:hover { background: var(--tint); }
+
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; background: var(--folder); border-top: 1px solid var(--rule); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabbar-in { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: var(--tab-h); }
+.tab { position: relative; display: grid; place-items: center; align-content: center; gap: 3px; border: 0; background: transparent; color: var(--muted); font-weight: 700; font-size: 12px; letter-spacing: 0.1em; cursor: pointer; }
+.tab svg { width: 22px; height: 22px; }
+.tab[aria-selected="true"] { color: var(--accent); }
+.tab[aria-selected="true"]::before { content: ""; position: absolute; top: -1px; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+
+.toast { position: fixed; left: 0; right: 0; bottom: calc(var(--tab-h) + var(--reg-h) + 10px + env(safe-area-inset-bottom, 0px)); z-index: 30; pointer-events: none; }
+body.no-reg .toast { bottom: calc(var(--tab-h) + 10px + env(safe-area-inset-bottom, 0px)); }
+.toast-in { pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; background: var(--ink); color: var(--bg); box-shadow: var(--lift); font-size: 14px; line-height: 1.45; animation: rise 0.2s ease-out; }
+.toast-in button { margin-left: auto; flex: none; padding: 6px 4px; border: 0; background: transparent; color: var(--mark); font-weight: 700; font-size: 14px; cursor: pointer; }
+
+/* ---- sheets ---- */
+.sheet { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; justify-content: flex-end; }
+.scrim { position: absolute; inset: 0; background: var(--scrim); }
+.panel { position: relative; display: flex; flex-direction: column; max-height: 88%; background: var(--surface); color: var(--ink); border-radius: 14px 14px 0 0; box-shadow: var(--lift); padding-bottom: env(safe-area-inset-bottom, 0px); animation: rise 0.2s ease-out; }
+.grip { flex: none; width: 40px; height: 4px; margin: 8px auto 2px; border-radius: 2px; background: var(--line); }
+.panel-in { flex: 0 1 auto; width: 100%; max-width: 560px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 8px 16px; display: grid; gap: 12px; overflow-y: auto; min-height: 0; }
+.panel-in.tall { flex: 1 1 auto; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sheet h2 { margin: 0; font-size: 18px; line-height: 1.35; }
+.sheet h2:focus { outline: none; }
+.sheet-lead { margin: 0; font-size: 14px; color: var(--muted); }
+.sheet-note { margin: 0; font-size: 12px; color: var(--muted); }
+.sheet-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 10px; padding-top: 2px; }
+.notice { margin: 0; padding: 8px 10px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); font-size: 13px; font-weight: 700; }
+@keyframes rise { from { transform: translateY(16px); opacity: 0.4; } to { transform: none; opacity: 1; } }
+
+.impact { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.imp { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--tint); min-width: 0; }
+.imp .k { font-size: 12px; color: var(--muted); }
+.imp .v { font-weight: 700; font-size: 22px; line-height: 1.15; white-space: nowrap; }
+.imp .v small { font-weight: 400; font-size: 12px; margin-left: 2px; color: var(--muted); }
+.up { color: var(--accent); }
+.down { color: var(--ink); }
+.implist { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.implist li { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; column-gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.4; }
+.implist .chip { width: 20px; height: 20px; }
+.implist small { color: var(--muted); font-size: 12px; }
+.implist b { font: 700 15px/1 var(--font-num); white-space: nowrap; }
+.pill { display: inline-block; font-size: 11px; line-height: 1.6; font-weight: 700; padding: 0 7px; border-radius: 999px; white-space: nowrap; vertical-align: 1px; }
+.pill.low { color: var(--warn); background: var(--warn-soft); }
+.pill.neg { color: var(--bad); background: var(--bad-soft); }
+
+.cs-sub { margin: 0; font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+.cs-recent { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; margin-top: 6px; }
+.rchip { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px 0 6px; border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); font-size: 14px; white-space: nowrap; cursor: pointer; }
+.rchip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.cs-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; align-content: start; padding-bottom: 4px; }
+.cs-list .empty-note { grid-column: 1 / -1; }
+.copt { display: flex; align-items: center; gap: 8px; min-height: 50px; min-width: 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); text-align: left; cursor: pointer; }
+.copt:hover { background: var(--tint); }
+.copt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.copt .t { display: grid; min-width: 0; line-height: 1.25; }
+.copt .t b { font-size: 14px; overflow-wrap: anywhere; }
+.copt .t small { font: 400 12px/1.3 var(--font-num); color: var(--muted); }
+
+/* ---- stock ---- */
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { height: 42px; border: 0; background: transparent; color: var(--muted); font-weight: 700; font-size: 15px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.legend { margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font-size: 13px; color: var(--muted); }
+.legend .sw { width: 14px; height: 14px; border-radius: 3px; background: var(--mark); border: 1px solid var(--rule); }
+.legend .lowtxt { color: var(--bad); font-weight: 700; }
+.tblwrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); }
+table.stock { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+table.stock th, table.stock td { padding: 7px 6px; border-bottom: 1px solid var(--line); }
+table.stock tbody tr:last-child > * { border-bottom: 0; }
+table.stock thead th { background: var(--tint); font: 700 12px/1.2 var(--font-num); color: var(--muted); text-align: center; }
+table.stock td { min-width: 36px; text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+table.stock td.z { color: var(--muted); }
+table.stock td.low, table.stock td.neg { color: var(--bad); background: var(--bad-soft); font-weight: 700; box-shadow: inset 0 -2px 0 var(--bad); }
+table.stock td.mk { background: var(--mark); color: var(--mark-ink); font-weight: 700; }
+table.stock td.mk.low, table.stock td.mk.neg { color: var(--bad); }
+table.stock td.tot { font-weight: 700; border-left: 1px solid var(--line); }
+table.stock th.lbl { position: sticky; left: 0; z-index: 1; min-width: 112px; max-width: 140px; background: var(--surface); text-align: left; font-weight: 400; border-right: 1px solid var(--line); }
+table.stock thead th.lbl { z-index: 2; background: var(--tint); }
+table.stock tr.grp th { background: var(--folder); text-align: left; font-size: 13px; font-weight: 700; padding: 5px 8px; }
+table.stock tr.grp th span { position: sticky; left: 8px; }
+.lblin { display: flex; align-items: center; gap: 8px; }
+.lblin .chip { width: 20px; height: 20px; }
+.lblin .t { display: grid; min-width: 0; line-height: 1.2; }
+.lblin .t b { font-size: 13px; }
+.lblin .t small { font-size: 11px; color: var(--muted); }
+.tblfoot { margin: 0; font-size: 13px; color: var(--muted); }
+.tblfoot b { color: var(--ink); font-size: 15px; margin: 0 2px; }
+.listhead { margin: 2px 0 0; font-size: 14px; font-weight: 700; }
+.rlist { border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); }
+.rrow { display: grid; grid-template-columns: 22px minmax(0, 1fr) 64px 70px; align-items: center; gap: 10px; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+.rrow:last-child { border-bottom: 0; }
+.rrow.mk { background: var(--mark); color: var(--mark-ink); }
+.rrow.mk small { color: inherit; }
+.rname { display: grid; min-width: 0; line-height: 1.3; }
+.rname b { font-size: 14px; }
+.rname small { font: 400 11px/1.5 var(--font-num); color: var(--muted); }
+.rbar { height: 8px; border-radius: 0 4px 4px 0; background: var(--tint); overflow: hidden; }
+.rbar i { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--bar); }
+.rrow.low .rbar i { background: var(--warn); }
+.rrow.neg .rbar i { background: var(--bad); }
+.rkg { text-align: right; font: 700 15px/1 var(--font-num); white-space: nowrap; }
+.rkg small { font-weight: 400; font-size: 11px; margin-left: 2px; }
+
+/* ---- log ---- */
+.months { display: flex; gap: 8px; overflow-x: auto; }
+.mchip { flex: none; height: 36px; padding: 0 14px; border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); font-weight: 700; font-size: 14px; cursor: pointer; }
+.mchip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tile { display: grid; gap: 2px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
+.tile .k { font-size: 12px; color: var(--muted); letter-spacing: 0.06em; }
+.tile .v { font-weight: 700; font-size: 26px; line-height: 1.15; }
+.tile .v small { font-weight: 400; font-size: 13px; margin-left: 3px; color: var(--muted); }
+.tile .s { font-size: 11px; color: var(--muted); }
+.panelbox { display: grid; gap: 10px; padding: 12px; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; }
+.panelbox h3 { margin: 0; font-size: 15px; }
+.hbars { display: grid; gap: 4px; }
+.hbar { display: grid; grid-template-columns: 42px minmax(0, 1fr) 54px; align-items: center; gap: 8px; min-height: 24px; font-size: 13px; }
+.hbar .lab { font-family: var(--font-num); color: var(--muted); }
+.hbar .tr { height: 12px; }
+.hbar .tr i { display: block; height: 100%; min-width: 2px; border-radius: 0 4px 4px 0; background: var(--bar); }
+.hbar .val { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; }
+.reclist { list-style: none; margin: 0; padding: 0; }
+.rec { border-bottom: 1px solid var(--line); }
+.rec:last-child { border-bottom: 0; }
+.rec summary { list-style: none; display: grid; grid-template-columns: 74px minmax(0, 1fr) 20px; gap: 10px; align-items: center; padding: 10px 0; cursor: pointer; }
+.rec summary::-webkit-details-marker { display: none; }
+.rdate { font: 700 17px/1.1 var(--font-num); }
+.rdate small { display: block; margin-top: 3px; font: 400 11px/1.2 var(--font-body); color: var(--muted); }
+.rmain { min-width: 0; font-size: 13px; color: var(--muted); }
+.rmain b { font-size: 18px; color: var(--ink); margin-right: 2px; }
+.rsub { display: block; font-size: 12px; }
+.chev { color: var(--muted); transition: transform 0.15s; }
+.chev svg { width: 18px; height: 18px; display: block; }
+.rec details[open] .chev { transform: rotate(180deg); }
+.rdetail { display: grid; gap: 10px; padding-bottom: 12px; font-size: 13px; }
+.rblock { display: grid; gap: 6px; }
+.rbh { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.rbh .chip { width: 18px; height: 18px; }
+.rbh small { color: var(--muted); }
+.rbh b { font-family: var(--font-num); }
+.dgrid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); text-align: center; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.dgrid span { background: var(--tint); font: 400 11px/1.6 var(--font-num); color: var(--muted); }
+.dgrid b { font: 700 13px/1.8 var(--font-num); }
+.dlist { margin: 0; padding-left: 1.2em; color: var(--ink); }
+.rnote { margin: 0; padding: 6px 10px; background: var(--tint); border-radius: 6px; }
+.footnote { margin: 0; font-size: 13px; line-height: 1.6; color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="wrap appbar-in">
+    <div class="titlebox">
+      <h1 class="title">インジェクション作業日報</h1>
+      <span class="badge">試作・ダミーデータ</span>
+    </div>
+    <button type="button" class="icon-btn" data-act="reset" aria-label="最初の状態に戻す" title="最初の状態に戻す">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5v5h5"/><path d="M5.6 15.5A7.5 7.5 0 1 0 6.3 7.8L4 10"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <div id="view-input" class="view wrap" role="tabpanel" aria-label="入力"></div>
+  <div id="view-stock" class="view wrap" role="tabpanel" aria-label="在庫" hidden></div>
+  <div id="view-log" class="view wrap" role="tabpanel" aria-label="記録" hidden></div>
+</main>
+
+<div id="regbar" class="regbar">
+  <div class="wrap">
+    <p id="regerr" class="regerr" role="alert" hidden></p>
+    <div class="regbar-in">
+      <div id="regsum" class="regsum" aria-live="polite"></div>
+      <button type="button" id="btn-register" class="primary" data-act="register">日報を登録</button>
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="画面の切り替え">
+  <div class="wrap tabbar-in" role="tablist">
+    <button type="button" class="tab" role="tab" data-tab="input" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/><path d="M13.5 6.5l3 3"/></svg>
+      <span>入力</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-tab="stock" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5L12 4l8.5 4.5v7L12 20l-8.5-4.5z"/><path d="M3.5 8.5L12 13l8.5-4.5"/><path d="M12 13v7"/></svg>
+      <span>在庫</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-tab="log" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 3.5h6v3H9z"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/></svg>
+      <span>記録</span>
+    </button>
+  </div>
+</nav>
+
+<div id="toast" class="toast" hidden>
+  <div class="wrap">
+    <div class="toast-in" role="status">
+      <span id="toast-msg"></span>
+      <button type="button" id="toast-act" hidden></button>
+    </div>
+  </div>
+</div>
+
+<div id="sheet-color" class="sheet" role="dialog" aria-modal="true" aria-labelledby="cs-title" hidden>
+  <div class="scrim" data-act="close-sheet"></div>
+  <div class="panel">
+    <div class="grip" aria-hidden="true"></div>
+    <div class="panel-in tall">
+      <div class="sheet-head">
+        <h2 id="cs-title" tabindex="-1" data-autofocus>カラーを選ぶ</h2>
+        <button type="button" class="icon-btn" data-act="close-sheet" aria-label="閉じる">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <label class="sr" for="cs-q">色を検索</label>
+      <input type="search" id="cs-q" placeholder="色名か番号で検索(例:ますかっと、035)" autocomplete="off" enterkeyhint="search">
+      <div id="cs-recent-wrap">
+        <p class="cs-sub">最近使った色</p>
+        <div id="cs-recent" class="cs-recent"></div>
+      </div>
+      <p id="cs-count" class="cs-sub"></p>
+      <div id="cs-list" class="cs-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="sheet-confirm" class="sheet" role="dialog" aria-modal="true" aria-labelledby="cf-title" hidden>
+  <div class="scrim" data-act="close-sheet"></div>
+  <div class="panel">
+    <div class="grip" aria-hidden="true"></div>
+    <div class="panel-in">
+      <h2 id="cf-title" tabindex="-1" data-autofocus>この日報で在庫が動きます</h2>
+      <div id="cf-body" class="view"></div>
+      <div class="sheet-actions">
+        <button type="button" class="ghost" data-act="close-sheet">戻って直す</button>
+        <button type="button" class="primary" data-act="commit">登録する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="sheet-reset" class="sheet" role="dialog" aria-modal="true" aria-labelledby="rs-title" hidden>
+  <div class="scrim" data-act="close-sheet"></div>
+  <div class="panel">
+    <div class="grip" aria-hidden="true"></div>
+    <div class="panel-in">
+      <h2 id="rs-title" tabindex="-1" data-autofocus>最初の状態に戻しますか?</h2>
+      <p class="sheet-lead">登録した日報と在庫の変化が消えて、最初のダミーデータに戻ります。</p>
+      <div class="sheet-actions">
+        <button type="button" class="ghost" data-act="close-sheet">やめる</button>
+        <button type="button" class="primary" data-act="do-reset">最初に戻す</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ===== 基本データ(すべてダミー) ===== */
+  const SIZES = [13, 14, 15, 16, 17, 18, 19, 20];
+  const HINBAN = [
+    { id: 'KB-101', name: '定番' },
+    { id: 'KB-102', name: 'ショート' },
+    { id: 'KB-205', name: 'ハイカット' },
+    { id: 'KB-306', name: 'ベルト付' }
+  ];
+  const HB = Object.fromEntries(HINBAN.map(h => [h.id, h]));
+  const WORKERS = ['工場長', 'スタッフA', 'スタッフB'];
+  const SOCKS = [
+    { id: 's-wh', name: '白', hex: '#f3f3ef' },
+    { id: 's-bk', name: '黒', hex: '#262626' },
+    { id: 's-nv', name: '紺', hex: '#28355e' },
+    { id: 's-gy', name: 'グレー', hex: '#9b9ea1' },
+    { id: 's-pk', name: 'ピンク', hex: '#f1b6c5' },
+    { id: 's-sk', name: '水色', hex: '#a9d3ea' },
+    { id: 's-be', name: 'ベージュ', hex: '#e2d2b6' },
+    { id: 's-ye', name: '黄', hex: '#f2da78' }
+  ];
+  const SK = Object.fromEntries(SOCKS.map(s => [s.id, s]));
+  const SOCK_TYPES = ['通常', 'ボア'];
+  const LOW_SOCK = 30;
+  const LOW_RESIN = 30;
+
+  const BASES = [
+    ['ピンク', 340, 75, 70], ['サクラ', 350, 70, 82], ['ローズ', 345, 60, 55], ['レッド', 2, 75, 50], ['ベリー', 330, 55, 40],
+    ['オレンジ', 25, 90, 55], ['アプリコット', 28, 80, 72], ['マンゴー', 40, 90, 55], ['イエロー', 50, 95, 55], ['レモン', 56, 90, 65],
+    ['ライム', 80, 65, 55], ['マスカット', 75, 45, 65], ['ミント', 155, 45, 72], ['グリーン', 140, 45, 40], ['オリーブ', 70, 35, 38],
+    ['エメラルド', 160, 60, 38], ['ターコイズ', 178, 60, 45], ['アクア', 190, 60, 65], ['スカイ', 200, 70, 70], ['ブルー', 215, 70, 50],
+    ['マリン', 205, 70, 38], ['ネイビー', 225, 50, 25], ['ラベンダー', 260, 45, 75], ['パープル', 275, 45, 45], ['グレープ', 290, 40, 32],
+    ['キャメル', 30, 45, 55], ['ブラウン', 22, 40, 32]
+  ];
+  const SPECIALS = [
+    ['ホワイト', '#f7f7f4'], ['オフホワイト', '#efece2'], ['アイボリー', '#f1e9d2'], ['ベージュ', '#dccbaa'],
+    ['ライトグレー', '#c9cbcd'], ['グレー', '#8f9295'], ['チャコール', '#4a4d50'], ['ブラック', '#1f2022'],
+    ['クリア', '#e6eef0'], ['クリアピンク', '#f6cfda'], ['クリアブルー', '#cfe3f3'], ['クリアイエロー', '#f5ecbc'],
+    ['ラメピンク', '#e889a8'], ['ラメブルー', '#6f9fd8'], ['ラメゴールド', '#c9a14a'], ['ラメシルバー', '#b8bcc2'],
+    ['ネオンピンク', '#ff4fa3'], ['ネオンイエロー', '#e8f53a'], ['ネオングリーン', '#48e06b'], ['ネオンオレンジ', '#ff7a2e'],
+    ['パール', '#ece6df'], ['パールピンク', '#ebc9cf'], ['ゴールド', '#c69c3c'], ['シルバー', '#aeb3b8']
+  ];
+  const COLORS = [];
+  (() => {
+    let n = 0;
+    const next = () => String(++n).padStart(3, '0');
+    for (const [name, h, s, l] of BASES) {
+      const tones = [['ライト', Math.max(20, s - 10), Math.min(90, l + 15)], ['', s, l], ['ダーク', Math.max(20, s - 5), Math.max(14, l - 15)]];
+      for (const [t, ss, ll] of tones) {
+        const code = next();
+        COLORS.push({ id: 'c' + code, code, name: t + name, hex: `hsl(${h}, ${ss}%, ${ll}%)` });
+      }
+    }
+    for (const [name, hex] of SPECIALS) {
+      const code = next();
+      COLORS.push({ id: 'c' + code, code, name, hex });
+    }
+  })();
+  const COLOR = Object.fromEntries(COLORS.map(c => [c.id, c]));
+  const cid = name => {
+    const c = COLORS.find(x => x.name === name);
+    if (!c) throw new Error('色がありません: ' + name);
+    return c.id;
+  };
+
+  /* ===== 小道具 ===== */
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const round1 = n => Math.round(n * 10) / 10;
+  const fmt = n => Number(n).toLocaleString('ja-JP');
+  const fmt1 = n => round1(n).toLocaleString('ja-JP', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const half = v => String(v ?? '').normalize('NFKC');
+  const toInt = v => { const n = parseInt(half(v), 10); return Number.isFinite(n) && n > 0 ? Math.min(n, 99999) : 0; };
+  const toKg = v => { const n = parseFloat(half(v)); return Number.isFinite(n) && n > 0 ? round1(Math.min(n, 99999)) : 0; };
+  const kana = v => half(v).toLowerCase().replace(/[ぁ-ゖ]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+  const pkey = (h, c, s, z) => `${h}|${c}|${s}|${z}`;
+  const skey = (s, z) => `${s}|${z}`;
+  const circled = i => (i < 20 ? String.fromCharCode(0x2460 + i) : `(${i + 1})`);
+  const DOW = '日月火水木金土';
+  const dateInfo = ds => {
+    const [y, m, d] = String(ds).split('-').map(Number);
+    const w = DOW[new Date(y, m - 1, d).getDay()] || '';
+    return { md: `${m}/${d}`, dow: w, full: `${m}月${d}日(${w})` };
+  };
+  const todayStr = () => {
+    const t = new Date();
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  };
+  const vlab = t => [...t].map(ch => `<span>${ch}</span>`).join('');
+  const blockTotal = b => SIZES.reduce((a, z) => a + toInt(b.sizes[z]), 0);
+  const recBlockTotal = b => SIZES.reduce((a, z) => a + (b.sizes[z] || 0), 0);
+  const byNewest = (a, b) => b.date.localeCompare(a.date) || (b.at || 0) - (a.at || 0);
+
+  const ICON = {
+    pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/><path d="M13.5 6.5l3 3"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
+  };
+
+  /* ===== 最初のダミーデータ ===== */
+  function rng(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  const SEED_DAYS = [
+    { date: '2026-10-07', cc: 1, note: 'マスカット、立ち上がりで色ムラ2足',
+      blocks: [['KB-101', 'マスカット', 's-wh', 72.5, [20, 26, 34, 38, 36, 30, 18, 12]], ['KB-102', 'サクラ', 's-pk', 51.0, [18, 22, 28, 30, 28, 22, 14, 8]]],
+      md: [[0, 16, 2, 1], [1, 14, 0, 1]], sd: [['通常', 's-pk', 15, 2]] },
+    { date: '2026-10-08', cc: 2, note: '',
+      blocks: [['KB-205', 'ラベンダー', 's-wh', 61.0, [0, 10, 24, 30, 32, 30, 24, 16]], ['KB-205', 'ブラック', 's-gy', 52.5, [0, 8, 20, 26, 28, 26, 20, 14]], ['KB-101', 'ピンク', 's-pk', 30.0, [12, 14, 16, 16, 12, 10, 6, 4]]],
+      md: [[0, 18, 1, 0], [2, 13, 1, 2]], sd: [] },
+    { date: '2026-10-09', cc: 1, note: 'ミント17cm、右のバリ多め。金型を確認',
+      blocks: [['KB-306', 'ミント', 's-wh', 68.0, [16, 20, 30, 34, 34, 28, 20, 12]], ['KB-102', 'スカイ', 's-sk', 56.5, [14, 20, 26, 30, 30, 24, 16, 10]]],
+      md: [[0, 17, 3, 2]], sd: [['通常', 's-sk', 18, 3], ['通常', 's-wh', 16, 1]] },
+    { date: '2026-10-13', cc: 1, note: '',
+      blocks: [['KB-101', 'ネイビー', 's-wh', 70.0, [18, 24, 32, 36, 34, 30, 20, 12]], ['KB-101', 'イエロー', 's-wh', 54.5, [16, 22, 28, 30, 28, 24, 14, 8]]],
+      md: [[1, 15, 1, 1]], sd: [] }
+  ];
+
+  function seedRecords() {
+    return SEED_DAYS.map((d, k) => ({
+      id: 'seed' + k, date: d.date, worker: '工場長', cc: d.cc, note: d.note, at: k + 1,
+      blocks: d.blocks.map(([h, cn, s, kg, q]) => ({ hinban: h, color: cid(cn), sock: s, resin: kg, sizes: Object.fromEntries(SIZES.map((z, i) => [z, q[i]])) })),
+      md: d.md.map(([b, size, r, l]) => ({ b, size, r, l })),
+      sd: d.sd.map(([type, sock, size, count]) => ({ type, sock, size, count }))
+    }));
+  }
+
+  function seedStock() {
+    const rnd = rng(20261014);
+    const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+    const rows = [
+      ['KB-101', 'マスカット', 's-wh'], ['KB-101', 'ピンク', 's-pk'], ['KB-101', 'ネイビー', 's-wh'], ['KB-101', 'イエロー', 's-wh'],
+      ['KB-102', 'サクラ', 's-pk'], ['KB-102', 'スカイ', 's-sk'], ['KB-102', 'レッド', 's-bk'],
+      ['KB-205', 'ラベンダー', 's-wh'], ['KB-205', 'ブラック', 's-gy'], ['KB-205', 'クリア', 's-wh'],
+      ['KB-306', 'ミント', 's-wh'], ['KB-306', 'ブラウン', 's-be']
+    ];
+    const product = {};
+    for (const [h, cn, s] of rows) {
+      const c = cid(cn);
+      for (const z of SIZES) product[pkey(h, c, s, z)] = (h === 'KB-205' && z === 13) ? 0 : (z >= 15 && z <= 18 ? ri(18, 86) : ri(0, 38));
+    }
+    const sock = {};
+    for (const s of SOCKS) for (const z of SIZES) sock[skey(s.id, z)] = ri(70, 420);
+    sock[skey('s-pk', 16)] = 18;
+    sock[skey('s-sk', 19)] = 12;
+    sock[skey('s-ye', 14)] = 26;
+    const active = new Set(rows.map(r => cid(r[1])));
+    const resin = {};
+    for (const c of COLORS) resin[c.id] = active.has(c.id) ? round1(ri(62, 178) + rnd()) : (rnd() < 0.35 ? 0 : round1(ri(6, 58) + rnd()));
+    resin[cid('マスカット')] = 58.5;
+    resin[cid('イエロー')] = 24.0;
+    return { product, sock, resin };
+  }
+
+  function recentFromRecords(records) {
+    const out = [];
+    [...records].sort(byNewest).forEach(r => r.blocks.forEach(b => { if (!out.includes(b.color)) out.push(b.color); }));
+    return out.slice(0, 8);
+  }
+
+  const emptyBlock = from => ({ hinban: from ? from.hinban : HINBAN[0].id, color: null, sock: from ? from.sock : SOCKS[0].id, resin: '', sizes: {} });
+  const exampleDraft = () => ({
+    date: todayStr(), worker: '工場長', example: true,
+    blocks: [{ hinban: 'KB-101', color: cid('マスカット'), sock: 's-wh', resin: '43.5', sizes: { 13: '12', 14: '16', 15: '20', 16: '24', 17: '22', 18: '18', 19: '10', 20: '6' } }],
+    md: [{ b: 0, size: 15, r: '1', l: '' }], sd: [], cc: 0, note: ''
+  });
+  const defaultUI = () => ({ tab: 'input', seg: 'product', q: '', showAllResin: false, month: null });
+
+  function initState() {
+    const records = seedRecords();
+    return { v: 1, stock: seedStock(), records, recent: recentFromRecords(records), draft: exampleDraft(), last: null, ui: defaultUI() };
+  }
+
+  /* ===== 保存(この端末のブラウザ内だけ) ===== */
+  const STORE_KEY = 'injection-nippo-proto-v1';
+  const isValid = s => !!(s && s.v === 1 && s.stock && s.stock.product && s.stock.sock && s.stock.resin && Array.isArray(s.records) && s.draft && Array.isArray(s.draft.blocks) && s.draft.blocks.length);
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      return isValid(s) ? s : null;
+    } catch (e) { return null; }
+  }
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* 保存できない環境でもそのまま動く */ }
+  }
+  let saveTimer = 0;
+  const saveSoon = () => { clearTimeout(saveTimer); saveTimer = setTimeout(save, 250); };
+
+  let state = null;
+
+  /* ===== 計算:日報 → 在庫の動き ===== */
+  function computeImpact(d) {
+    const prod = {}, sock = {}, resin = {};
+    const add = (o, k, v) => { o[k] = round1((o[k] || 0) + v); };
+    let pairs = 0, defects = 0, resinMissing = false;
+    d.blocks.forEach(b => {
+      const t = blockTotal(b);
+      pairs += t;
+      if (!t) return;
+      for (const z of SIZES) {
+        const q = toInt(b.sizes[z]);
+        if (!q) continue;
+        if (b.color) add(prod, pkey(b.hinban, b.color, b.sock, z), q);
+        add(sock, skey(b.sock, z), -2 * q);
+      }
+      const kg = toKg(b.resin);
+      if (!kg) resinMissing = true;
+      else if (b.color) add(resin, b.color, -kg);
+    });
+    d.md.forEach(m => {
+      const b = d.blocks[m.b];
+      if (!b) return;
+      const q = toInt(m.r) + toInt(m.l);
+      if (!q) return;
+      defects += q;
+      add(sock, skey(b.sock, m.size), -q);
+    });
+    d.sd.forEach(s => { const q = toInt(s.count); if (q) add(sock, skey(s.sock, s.size), -q); });
+    const sockUsed = -Object.values(sock).reduce((a, v) => a + v, 0);
+    const resinKg = round1(-Object.values(resin).reduce((a, v) => a + v, 0));
+    return { prod, sock, resin, pairs, defects, sockUsed, resinKg, resinMissing };
+  }
+
+  function validate(d) {
+    if (!d.date) return '日付を入れてください。';
+    const total = d.blocks.reduce((a, b) => a + blockTotal(b), 0);
+    if (!total) return '足数が入っていません。サイズの欄に足数を入れてください。';
+    for (let i = 0; i < d.blocks.length; i++) {
+      const b = d.blocks[i];
+      const used = blockTotal(b) > 0 || d.md.some(m => m.b === i && toInt(m.r) + toInt(m.l) > 0);
+      if (used && !b.color) return `${circled(i)}のカラーを選んでください。`;
+    }
+    return '';
+  }
+
+  /* ===== 入力画面 ===== */
+  function blockHTML(b, i) {
+    const c = b.color ? COLOR[b.color] : null;
+    const many = state.draft.blocks.length > 1;
+    return `<div class="block" data-b="${i}">
+      <div class="block-head">
+        <span class="bno" aria-hidden="true">${circled(i)}</span>
+        <label class="sr" for="hb-${i}">${circled(i)} 品番</label>
+        <select id="hb-${i}" data-f="hinban" data-b="${i}">${HINBAN.map(h => `<option value="${h.id}"${h.id === b.hinban ? ' selected' : ''}>${h.id} ${esc(h.name)}</option>`).join('')}</select>
+        ${many ? `<button type="button" class="icon-btn sm" data-act="del-block" data-b="${i}" aria-label="${circled(i)}の行を消す">${ICON.x}</button>` : ''}
+      </div>
+      <button type="button" class="colorpick${c ? '' : ' unset'}" id="cp-${i}" data-act="pick-color" data-b="${i}">
+        <span class="chip lg" style="--c:${c ? c.hex : 'transparent'}"></span>
+        ${c ? `<span class="cname">${esc(c.name)}</span><span class="ccode">No.${c.code}</span><span class="cchg">変更</span>` : '<span class="cname">カラーを選ぶ</span>'}
+      </button>
+      <div class="row2">
+        <label class="mini" for="sk-${i}"><span>靴下カラー</span><select id="sk-${i}" data-f="sock" data-b="${i}">${SOCKS.map(s => `<option value="${s.id}"${s.id === b.sock ? ' selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label>
+        <label class="mini" for="rz-${i}"><span>レジン使用量</span><span class="unit"><input id="rz-${i}" class="txt" data-f="resin" data-b="${i}" inputmode="decimal" autocomplete="off" placeholder="0.0" value="${esc(b.resin)}"><em>kg</em></span></label>
+      </div>
+      <div class="sizegrid" role="group" aria-label="${circled(i)} サイズ別の足数">
+        ${SIZES.map(z => `<label class="scell" for="sz-${i}-${z}"><span class="slabel">${z}<small>cm</small></span><input id="sz-${i}-${z}" data-f="size" data-b="${i}" data-s="${z}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0" value="${esc(b.sizes[z] ?? '')}" aria-label="${z}cmの足数"></label>`).join('')}
+      </div>
+      <div class="block-foot">
+        ${i === 0 ? '<span class="qnote"><span class="q">要確認</span>足数は良品の数として計算</span>' : '<span></span>'}
+        <span class="btotal">計<b id="bt-${i}">${fmt(blockTotal(b))}</b>足</span>
+      </div>
+    </div>`;
+  }
+
+  function mdHTML(m, i) {
+    const d = state.draft;
+    return `<div class="drow" id="md-${i}">
+      <label class="fld s5" for="mdb-${i}"><span>どの行</span><select id="mdb-${i}" data-f="md-b" data-i="${i}">${d.blocks.map((b, bi) => `<option value="${bi}"${bi === m.b ? ' selected' : ''}>${circled(bi)} ${b.hinban} ${b.color ? esc(COLOR[b.color].name) : '(色未選択)'}</option>`).join('')}</select></label>
+      <button type="button" class="icon-btn sm s1" data-act="del-md" data-i="${i}" aria-label="この不良を消す">${ICON.x}</button>
+      <label class="fld s2" for="mds-${i}"><span>サイズ</span><select id="mds-${i}" data-f="md-s" data-i="${i}">${SIZES.map(z => `<option value="${z}"${z === m.size ? ' selected' : ''}>${z}cm</option>`).join('')}</select></label>
+      <label class="fld s2 lr" for="mdr-${i}"><span>右</span><input id="mdr-${i}" class="txt" data-f="md-r" data-i="${i}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0" value="${esc(m.r)}"></label>
+      <label class="fld s2 lr" for="mdl-${i}"><span>左</span><input id="mdl-${i}" class="txt" data-f="md-l" data-i="${i}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0" value="${esc(m.l)}"></label>
+    </div>`;
+  }
+
+  function sdHTML(s, i) {
+    return `<div class="drow" id="sd-${i}">
+      <label class="fld s2" for="sdt-${i}"><span>種類</span><select id="sdt-${i}" data-f="sd-t" data-i="${i}">${SOCK_TYPES.map(t => `<option${t === s.type ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></label>
+      <label class="fld s3" for="sdk-${i}"><span>靴下カラー</span><select id="sdk-${i}" data-f="sd-k" data-i="${i}">${SOCKS.map(k => `<option value="${k.id}"${k.id === s.sock ? ' selected' : ''}>${esc(k.name)}</option>`).join('')}</select></label>
+      <button type="button" class="icon-btn sm s1" data-act="del-sd" data-i="${i}" aria-label="この不良を消す">${ICON.x}</button>
+      <label class="fld s3" for="sds-${i}"><span>サイズ</span><select id="sds-${i}" data-f="sd-s" data-i="${i}">${SIZES.map(z => `<option value="${z}"${z === s.size ? ' selected' : ''}>${z}cm</option>`).join('')}</select></label>
+      <label class="fld s3 lr" for="sdn-${i}"><span>枚数</span><input id="sdn-${i}" class="txt" data-f="sd-n" data-i="${i}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0" value="${esc(s.count)}"></label>
+    </div>`;
+  }
+
+  function renderInput() {
+    const d = state.draft;
+    $('#view-input').innerHTML = `
+      <p class="hint">${ICON.pencil}<span>${d.example
+        ? '紙の日報と同じ欄です。例として入力済みなので、そのまま「日報を登録」を押すと、製品・靴下・レジンの在庫が一度に動く様子を見られます。'
+        : '紙の日報と同じ欄です。サイズの欄に足数を入れて「日報を登録」を押すと、在庫が自動で増減します。'}</span></p>
+      <div class="meta">
+        <label class="field" for="f-date"><span class="flabel">日付</span><input type="date" id="f-date" value="${esc(d.date)}"></label>
+        <label class="field" for="f-worker"><span class="flabel">担当者</span><select id="f-worker">${WORKERS.map(w => `<option${w === d.worker ? ' selected' : ''}>${esc(w)}</option>`).join('')}</select></label>
+      </div>
+      <section class="formsec" aria-labelledby="h-mold">
+        <div class="vlabel" aria-hidden="true">${vlab('成形足数')}</div>
+        <div class="secbody">
+          <h2 id="h-mold" class="sr">成形足数</h2>
+          <div class="blocks">${d.blocks.map(blockHTML).join('')}</div>
+          <button type="button" class="addbtn" data-act="add-block">＋ 品番・カラーを追加</button>
+        </div>
+      </section>
+      <section class="formsec" aria-labelledby="h-def">
+        <div class="vlabel" aria-hidden="true">${vlab('主な不良')}</div>
+        <div class="secbody">
+          <h2 id="h-def" class="sr">主な不良</h2>
+          <div class="subhead">成形品<small>右と左それぞれの個数</small></div>
+          <div class="drows">${d.md.length ? d.md.map(mdHTML).join('') : '<p class="empty-note">なし</p>'}</div>
+          <button type="button" class="addbtn sm" data-act="add-md">＋ 成形品の不良を追加</button>
+          <div class="subhead">靴下<small><span class="q">要確認</span>「種類」欄に書く中身</small></div>
+          <div class="drows">${d.sd.length ? d.sd.map(sdHTML).join('') : '<p class="empty-note">なし</p>'}</div>
+          <button type="button" class="addbtn sm" data-act="add-sd">＋ 靴下の不良を追加</button>
+        </div>
+      </section>
+      <section class="formsec" aria-labelledby="h-note">
+        <div class="vlabel" aria-hidden="true">${vlab('備考')}</div>
+        <div class="secbody">
+          <h2 id="h-note" class="sr">備考</h2>
+          <div class="ccrow">
+            <span class="lbl" id="cc-label">色替え数</span>
+            <div class="stepper" role="group" aria-labelledby="cc-label">
+              <button type="button" data-act="cc-minus" aria-label="色替えを1回減らす">−</button>
+              <output id="cc-val" aria-live="polite">${d.cc}</output>
+              <button type="button" data-act="cc-plus" aria-label="色替えを1回増やす">＋</button>
+            </div>
+            <span>回</span>
+          </div>
+          <label class="field" for="f-note"><span class="flabel">気づいたこと</span><textarea id="f-note" rows="2" placeholder="例:17cm 右のバリ多め">${esc(d.note)}</textarea></label>
+        </div>
+      </section>`;
+    updateSummary();
+  }
+
+  function rerenderInput(focusId, scrollId) {
+    renderInput();
+    if (scrollId) { const s = document.getElementById(scrollId); if (s) s.scrollIntoView({ block: 'center' }); }
+    if (focusId) { const el = document.getElementById(focusId); if (el) el.focus({ preventScroll: true }); }
+  }
+
+  function updateSummary() {
+    const imp = computeImpact(state.draft);
+    $('#regsum').innerHTML = `<span>成形<b>${fmt(imp.pairs)}</b>足</span><span>不良<b>${fmt(imp.defects)}</b>個 ・ 色替え<b>${state.draft.cc}</b>回</span>`;
+  }
+  function updateBlockTotal(i) {
+    const el = document.getElementById('bt-' + i);
+    if (el) el.textContent = fmt(blockTotal(state.draft.blocks[i]));
+  }
+  function showErr(msg) { const e = $('#regerr'); e.textContent = msg; e.hidden = false; }
+  function hideErr() { $('#regerr').hidden = true; }
+
+  /* ===== カラーを選ぶ ===== */
+  let colorTarget = null;
+  function openColor(bi, from) {
+    colorTarget = bi;
+    $('#cs-q').value = '';
+    renderColorRecent();
+    renderColorList();
+    openSheet('sheet-color', from);
+    $('#cs-list').scrollTop = 0;
+  }
+  function currentColor() {
+    const b = colorTarget != null ? state.draft.blocks[colorTarget] : null;
+    return b ? b.color : null;
+  }
+  function renderColorRecent() {
+    const cur = currentColor();
+    const ids = (state.recent || []).filter(id => COLOR[id]);
+    $('#cs-recent').innerHTML = ids.map(id => {
+      const c = COLOR[id];
+      return `<button type="button" class="rchip" data-color="${id}" aria-pressed="${id === cur}"><span class="chip" style="--c:${c.hex}"></span>${esc(c.name)}</button>`;
+    }).join('');
+    $('#cs-recent-wrap').hidden = !ids.length;
+  }
+  function renderColorList() {
+    const raw = $('#cs-q').value.trim();
+    const q = kana(raw).replace(/^no\.?/, '');
+    const cur = currentColor();
+    const list = q ? COLORS.filter(c => kana(c.name).includes(q) || c.code.includes(q)) : COLORS;
+    $('#cs-count').textContent = q ? `${list.length}色が見つかりました` : `全${COLORS.length}色`;
+    $('#cs-recent-wrap').hidden = !!q || !(state.recent || []).length;
+    $('#cs-list').innerHTML = list.length
+      ? list.map(c => `<button type="button" class="copt" data-color="${c.id}" aria-pressed="${c.id === cur}"><span class="chip" style="--c:${c.hex}"></span><span class="t"><b>${esc(c.name)}</b><small>No.${c.code}</small></span></button>`).join('')
+      : `<p class="empty-note">「${esc(raw)}」に合う色がありません。色名の一部か番号で探してください。</p>`;
+  }
+  function pushRecent(id) {
+    state.recent = [id, ...(state.recent || []).filter(x => x !== id)].slice(0, 8);
+  }
+  function chooseColor(id) {
+    const bi = colorTarget;
+    closeSheet();
+    colorTarget = null;
+    if (bi == null || !state.draft.blocks[bi] || !COLOR[id]) return;
+    state.draft.blocks[bi].color = id;
+    pushRecent(id);
+    hideErr();
+    rerenderInput('cp-' + bi);
+    saveSoon();
+  }
+
+  /* ===== シート(下から出る画面) ===== */
+  let opener = null;
+  function openSheet(id, from) {
+    opener = from || document.activeElement;
+    const s = document.getElementById(id);
+    s.hidden = false;
+    document.documentElement.classList.add('locked');
+    const f = s.querySelector('[data-autofocus]');
+    if (f) setTimeout(() => f.focus({ preventScroll: true }), 20);
+  }
+  function closeSheet() {
+    document.querySelectorAll('.sheet').forEach(s => { s.hidden = true; });
+    document.documentElement.classList.remove('locked');
+    if (opener && document.body.contains(opener)) opener.focus({ preventScroll: true });
+    opener = null;
+  }
+
+  /* ===== 登録 ===== */
+  function openConfirm(from) {
+    const d = state.draft;
+    const err = validate(d);
+    if (err) { showErr(err); return; }
+    hideErr();
+    const imp = computeImpact(d);
+    const di = dateInfo(d.date);
+    const dup = state.records.some(r => r.date === d.date);
+    const prodLines = d.blocks.map((b, i) => {
+      const t = blockTotal(b);
+      if (!t || !b.color) return '';
+      const c = COLOR[b.color];
+      return `<li><span class="chip" style="--c:${c.hex}"></span><span>${circled(i)} ${b.hinban} ${esc(c.name)}<small> 靴下 ${esc(SK[b.sock].name)}</small></span><b class="up">+${fmt(t)}足</b></li>`;
+    }).join('');
+    const sockByColor = {};
+    for (const [k, v] of Object.entries(imp.sock)) { const s = k.split('|')[0]; sockByColor[s] = (sockByColor[s] || 0) + v; }
+    const sockLines = Object.entries(sockByColor).map(([s, v]) =>
+      `<li><span class="chip" style="--c:${SK[s].hex}"></span><span>靴下 ${esc(SK[s].name)}</span><b>−${fmt(-v)}枚</b></li>`).join('');
+    const resinLines = Object.entries(imp.resin).map(([c, v]) => {
+      const after = round1((state.stock.resin[c] || 0) + v);
+      const st = after <= 0 ? '<span class="pill neg">在庫なし</span>' : after < LOW_RESIN ? '<span class="pill low">残り少</span>' : '';
+      return `<li><span class="chip" style="--c:${COLOR[c].hex}"></span><span>レジン ${esc(COLOR[c].name)}<small> 残り ${fmt1(after)}kg</small> ${st}</span><b>−${fmt1(-v)}kg</b></li>`;
+    }).join('');
+    $('#cf-body').innerHTML = `
+      <p class="sheet-lead">${di.full}・${esc(d.worker)}</p>
+      ${dup ? '<p class="notice">この日付の記録がすでにあります。2件目として追加します。</p>' : ''}
+      <div class="impact">
+        <div class="imp"><span class="k">製品</span><span class="v up">+${fmt(imp.pairs)}<small>足</small></span></div>
+        <div class="imp"><span class="k">靴下</span><span class="v down">−${fmt(imp.sockUsed)}<small>枚</small></span></div>
+        <div class="imp"><span class="k">レジン</span><span class="v down">−${fmt1(imp.resinKg)}<small>kg</small></span></div>
+      </div>
+      <ul class="implist">${prodLines}${sockLines}${resinLines}</ul>
+      ${imp.resinMissing ? '<p class="notice">レジン使用量が空の行があります。その行のレジン在庫は動きません。</p>' : ''}
+      <p class="sheet-note">靴下は「1足につき2枚」と「成形品の不良1個につき1枚」で計算しています。</p>`;
+    openSheet('sheet-confirm', from);
+  }
+
+  function commit() {
+    const d = state.draft;
+    const err = validate(d);
+    if (err) { closeSheet(); showErr(err); return; }
+    const imp = computeImpact(d);
+    const S = state.stock;
+    for (const [k, v] of Object.entries(imp.prod)) S.product[k] = (S.product[k] || 0) + v;
+    for (const [k, v] of Object.entries(imp.sock)) S.sock[k] = (S.sock[k] || 0) + v;
+    for (const [k, v] of Object.entries(imp.resin)) S.resin[k] = round1((S.resin[k] || 0) + v);
+    state.last = { prod: imp.prod, sock: imp.sock, resin: imp.resin };
+
+    const keep = d.blocks.map((b, i) => blockTotal(b) > 0 || d.md.some(m => m.b === i && toInt(m.r) + toInt(m.l) > 0));
+    const map = {};
+    let n = 0;
+    keep.forEach((on, i) => { if (on) map[i] = n++; });
+    const rec = {
+      id: 'r' + Date.now(), date: d.date, worker: d.worker, cc: d.cc, note: d.note.trim(), at: Date.now(),
+      blocks: d.blocks.filter((_, i) => keep[i]).map(b => ({ hinban: b.hinban, color: b.color, sock: b.sock, resin: toKg(b.resin), sizes: Object.fromEntries(SIZES.map(z => [z, toInt(b.sizes[z])])) })),
+      md: d.md.filter(m => keep[m.b] && toInt(m.r) + toInt(m.l) > 0).map(m => ({ b: map[m.b], size: m.size, r: toInt(m.r), l: toInt(m.l) })),
+      sd: d.sd.filter(s => toInt(s.count) > 0).map(s => ({ type: s.type, sock: s.sock, size: s.size, count: toInt(s.count) }))
+    };
+    state.records.push(rec);
+    rec.blocks.forEach(b => pushRecent(b.color));
+    state.ui.month = rec.date.slice(0, 7);
+    state.draft = { date: d.date, worker: d.worker, example: false, blocks: [emptyBlock(d.blocks[d.blocks.length - 1])], md: [], sd: [], cc: 0, note: '' };
+    save();
+    closeSheet();
+    renderInput();
+    window.scrollTo(0, 0);
+    showToast(`登録しました。製品 +${fmt(imp.pairs)}足を在庫に反映しました。`, '在庫を見る', () => { state.ui.seg = 'product'; state.ui.q = ''; switchTab('stock'); });
+  }
+
+  /* ===== 在庫画面 ===== */
+  function renderStock() {
+    const seg = state.ui.seg;
+    const ph = seg === 'product' ? '品番・色で絞り込み' : seg === 'sock' ? '靴下の色で絞り込み' : '色名か番号で絞り込み';
+    const lowNote = seg === 'sock' ? `赤は残り少(${LOW_SOCK}枚未満)` : seg === 'resin' ? `残り少は${LOW_RESIN}kg未満` : '';
+    $('#view-stock').innerHTML = `
+      <div class="seg" role="tablist" aria-label="在庫の種類">
+        ${[['product', '製品'], ['sock', '靴下'], ['resin', 'レジン']].map(([k, l]) => `<button type="button" role="tab" data-seg="${k}" aria-selected="${k === seg}">${l}</button>`).join('')}
+      </div>
+      <label class="sr" for="st-q">絞り込み</label>
+      <input type="search" id="st-q" placeholder="${ph}" value="${esc(state.ui.q || '')}" autocomplete="off" enterkeyhint="search">
+      <p class="legend">${state.last ? '<span class="sw" aria-hidden="true"></span><span>黄色は、さっきの登録で動いた所</span>' : '<span>日報を登録すると、ここが自動で増減します。</span>'}${lowNote ? `<span class="lowtxt">${lowNote}</span>` : ''}</p>
+      <div id="st-body"></div>`;
+    renderStockBody();
+  }
+
+  function renderStockBody() {
+    const seg = state.ui.seg;
+    const q = kana((state.ui.q || '').trim());
+    const el = $('#st-body');
+    if (!el) return;
+    el.innerHTML = seg === 'product' ? productTable(q) : seg === 'sock' ? sockTable(q) : resinList(q);
+  }
+
+  const sizeHead = first => `<thead><tr><th class="lbl" scope="col">${first}</th>${SIZES.map(z => `<th scope="col">${z}</th>`).join('')}<th scope="col">計</th></tr></thead>`;
+
+  function productTable(q) {
+    const last = state.last ? state.last.prod : {};
+    const rows = new Map();
+    for (const [k, v] of Object.entries(state.stock.product)) {
+      const [h, c, s, z] = k.split('|');
+      if (!HB[h] || !COLOR[c] || !SK[s]) continue;
+      const g = `${h}|${c}|${s}`;
+      if (!rows.has(g)) rows.set(g, { h, c, s, sizes: {} });
+      rows.get(g).sizes[z] = v;
+    }
+    let list = [...rows.values()].filter(r => SIZES.some(z => (r.sizes[z] || 0) !== 0));
+    if (q) list = list.filter(r => kana(`${r.h} ${HB[r.h].name} ${COLOR[r.c].name} ${COLOR[r.c].code} ${SK[r.s].name}`).includes(q));
+    if (!list.length) return `<p class="empty-note">${q ? '条件に合う製品がありません。' : '製品在庫はまだありません。'}</p>`;
+    list.sort((a, b) => a.h.localeCompare(b.h) || COLOR[a.c].code.localeCompare(COLOR[b.c].code) || a.s.localeCompare(b.s));
+    let html = '', cur = null, grand = 0;
+    for (const r of list) {
+      if (r.h !== cur) {
+        cur = r.h;
+        html += `<tr class="grp"><th colspan="${SIZES.length + 2}" scope="rowgroup"><span>${r.h} ${esc(HB[r.h].name)}</span></th></tr>`;
+      }
+      let tot = 0;
+      const cells = SIZES.map(z => {
+        const v = r.sizes[z] || 0;
+        tot += v;
+        const cls = [v === 0 ? 'z' : '', last[pkey(r.h, r.c, r.s, z)] ? 'mk' : ''].filter(Boolean).join(' ');
+        return `<td${cls ? ` class="${cls}"` : ''}>${fmt(v)}</td>`;
+      }).join('');
+      grand += tot;
+      const c = COLOR[r.c];
+      html += `<tr><th class="lbl" scope="row"><span class="lblin"><span class="chip" style="--c:${c.hex}"></span><span class="t"><b>${esc(c.name)}</b><small>靴下 ${esc(SK[r.s].name)}</small></span></span></th>${cells}<td class="tot">${fmt(tot)}</td></tr>`;
+    }
+    return `<div class="tblwrap"><table class="stock">${sizeHead('カラー・靴下')}<tbody>${html}</tbody></table></div>
+      <p class="tblfoot">表示中の製品在庫 合計<b>${fmt(grand)}</b>足</p>`;
+  }
+
+  function sockTable(q) {
+    const last = state.last ? state.last.sock : {};
+    const list = q ? SOCKS.filter(s => kana(s.name).includes(q)) : SOCKS;
+    if (!list.length) return '<p class="empty-note">条件に合う靴下がありません。</p>';
+    const body = list.map(s => {
+      let tot = 0;
+      const cells = SIZES.map(z => {
+        const k = skey(s.id, z);
+        const v = state.stock.sock[k] || 0;
+        tot += v;
+        const cls = [v <= 0 ? 'neg' : v < LOW_SOCK ? 'low' : '', last[k] ? 'mk' : ''].filter(Boolean).join(' ');
+        return `<td${cls ? ` class="${cls}"` : ''}>${fmt(v)}</td>`;
+      }).join('');
+      return `<tr><th class="lbl" scope="row"><span class="lblin"><span class="chip" style="--c:${s.hex}"></span><span class="t"><b>${esc(s.name)}</b></span></span></th>${cells}<td class="tot">${fmt(tot)}</td></tr>`;
+    }).join('');
+    return `<div class="tblwrap"><table class="stock">${sizeHead('靴下カラー')}<tbody>${body}</tbody></table></div>`;
+  }
+
+  function recentResinIds() {
+    const out = [];
+    [...state.records].sort(byNewest).forEach(r => r.blocks.forEach(b => { if (COLOR[b.color] && !out.includes(b.color)) out.push(b.color); }));
+    return out.slice(0, 10);
+  }
+
+  function resinRow(c) {
+    const last = state.last ? state.last.resin : {};
+    const kg = state.stock.resin[c.id] || 0;
+    const st = kg <= 0 ? 'neg' : kg < LOW_RESIN ? 'low' : '';
+    const pill = st === 'neg' ? ' <span class="pill neg">在庫なし</span>' : st === 'low' ? ' <span class="pill low">残り少</span>' : '';
+    const w = Math.max(0, Math.min(100, kg / 200 * 100)).toFixed(1);
+    return `<div class="rrow${st ? ' ' + st : ''}${last[c.id] ? ' mk' : ''}"><span class="chip" style="--c:${c.hex}"></span><span class="rname"><b>${esc(c.name)}</b><small>No.${c.code}${pill}</small></span><span class="rbar" aria-hidden="true"><i style="width:${w}%"></i></span><span class="rkg">${fmt1(kg)}<small>kg</small></span></div>`;
+  }
+
+  function resinList(q) {
+    if (q) {
+      const qq = q.replace(/^no\.?/, '');
+      const list = COLORS.filter(c => kana(c.name).includes(qq) || c.code.includes(qq));
+      return list.length ? `<div class="rlist">${list.map(resinRow).join('')}</div>` : '<p class="empty-note">条件に合う色がありません。</p>';
+    }
+    const recent = recentResinIds();
+    const all = !!state.ui.showAllResin;
+    return `<h3 class="listhead">最近使った色</h3>
+      <div class="rlist">${recent.map(id => resinRow(COLOR[id])).join('')}</div>
+      <button type="button" class="addbtn sm" data-act="toggle-resin" aria-expanded="${all}">${all ? 'すべての色を閉じる' : `すべての色を見る(${COLORS.length}色)`}</button>
+      ${all ? `<div class="rlist">${COLORS.map(resinRow).join('')}</div>` : ''}`;
+  }
+
+  /* ===== 記録画面 ===== */
+  function recHTML(r) {
+    const di = dateInfo(r.date);
+    const pairs = r.blocks.reduce((a, b) => a + recBlockTotal(b), 0);
+    const defects = r.md.reduce((a, m) => a + m.r + m.l, 0);
+    const blocks = r.blocks.map((b, i) => {
+      const c = COLOR[b.color];
+      if (!c) return '';
+      return `<div class="rblock">
+        <div class="rbh"><span class="chip" style="--c:${c.hex}"></span><span>${circled(i)} ${b.hinban} ${esc(c.name)}<small> 靴下 ${esc(SK[b.sock] ? SK[b.sock].name : '')}${b.resin ? ` ・ レジン ${fmt1(b.resin)}kg` : ''}</small></span><b>${fmt(recBlockTotal(b))}足</b></div>
+        <div class="dgrid">${SIZES.map(z => `<span>${z}</span>`).join('')}${SIZES.map(z => `<b>${b.sizes[z] ? fmt(b.sizes[z]) : '·'}</b>`).join('')}</div>
+      </div>`;
+    }).join('');
+    const md = r.md.map(m => `<li>成形品 ${circled(m.b)} ${m.size}cm 右${m.r}・左${m.l}</li>`).join('');
+    const sd = r.sd.map(s => `<li>靴下 ${esc(SK[s.sock] ? SK[s.sock].name : '')}(${esc(s.type)}) ${s.size}cm ${s.count}枚</li>`).join('');
+    return `<li class="rec"><details>
+      <summary><span class="rdate">${di.md}<small>${di.dow}曜・${esc(r.worker)}</small></span><span class="rmain"><b>${fmt(pairs)}</b>足<span class="rsub">不良 ${defects}個 ・ 色替え ${r.cc}回</span></span><span class="chev">${ICON.chev}</span></summary>
+      <div class="rdetail">${blocks}${md || sd ? `<ul class="dlist">${md}${sd}</ul>` : '<p class="empty-note">不良なし</p>'}${r.note ? `<p class="rnote">${esc(r.note)}</p>` : ''}</div>
+    </details></li>`;
+  }
+
+  function renderLog() {
+    const v = $('#view-log');
+    const months = [...new Set(state.records.map(r => r.date.slice(0, 7)))].sort().reverse();
+    if (!months.length) { v.innerHTML = '<p class="empty-note">記録はまだありません。入力画面から日報を登録すると、ここに並びます。</p>'; return; }
+    const m = months.includes(state.ui.month) ? state.ui.month : months[0];
+    const recs = state.records.filter(r => r.date.startsWith(m)).sort(byNewest);
+    let pairs = 0, defects = 0, cc = 0;
+    const bySize = Object.fromEntries(SIZES.map(z => [z, 0]));
+    for (const r of recs) {
+      for (const b of r.blocks) for (const z of SIZES) { const q = b.sizes[z] || 0; pairs += q; bySize[z] += q; }
+      for (const d of r.md) defects += d.r + d.l;
+      cc += r.cc;
+    }
+    const days = new Set(recs.map(r => r.date)).size || 1;
+    const rate = pairs ? defects / (pairs * 2 + defects) * 100 : 0;
+    const maxS = Math.max(1, ...Object.values(bySize));
+    const mm = Number(m.split('-')[1]);
+    v.innerHTML = `
+      <div class="months" role="group" aria-label="月を選ぶ">${months.map(x => { const [y, mo] = x.split('-').map(Number); return `<button type="button" class="mchip" data-month="${x}" aria-pressed="${x === m}">${y}年${mo}月</button>`; }).join('')}</div>
+      <div class="tiles">
+        <div class="tile"><span class="k">成形足数</span><span class="v">${fmt(pairs)}<small>足</small></span><span class="s">${days}日分・1日平均 ${fmt(Math.round(pairs / days))}足</span></div>
+        <div class="tile"><span class="k">不良</span><span class="v">${fmt(defects)}<small>個</small></span><span class="s">右と左の合計</span></div>
+        <div class="tile"><span class="k">不良率</span><span class="v">${rate.toFixed(2)}<small>%</small></span><span class="s">片足1個ずつで計算</span></div>
+        <div class="tile"><span class="k">色替え</span><span class="v">${fmt(cc)}<small>回</small></span><span class="s">1日平均 ${(cc / days).toFixed(1)}回</span></div>
+      </div>
+      <section class="panelbox" aria-labelledby="h-sz">
+        <h3 id="h-sz">サイズ別の成形足数(${mm}月)</h3>
+        <div class="hbars">${SIZES.map(z => `<div class="hbar" title="${z}cm:${fmt(bySize[z])}足"><span class="lab">${z}cm</span><span class="tr"><i style="width:${(bySize[z] / maxS * 100).toFixed(1)}%"></i></span><span class="val">${fmt(bySize[z])}</span></div>`).join('')}</div>
+      </section>
+      <section class="panelbox" aria-labelledby="h-days">
+        <h3 id="h-days">日ごとの記録</h3>
+        <ul class="reclist">${recs.map(recHTML).join('')}</ul>
+      </section>
+      <p class="footnote">紙からPCへの打ち直しはなくなり、合計と集計は自動で出ます。本番では、この記録をExcelに書き出す形にもできます。</p>`;
+  }
+
+  /* ===== 画面の切り替え・通知 ===== */
+  function switchTab(tab) {
+    if (!['input', 'stock', 'log'].includes(tab)) tab = 'input';
+    state.ui.tab = tab;
+    for (const t of ['input', 'stock', 'log']) document.getElementById('view-' + t).hidden = t !== tab;
+    document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+    $('#regbar').hidden = tab !== 'input';
+    document.body.classList.toggle('no-reg', tab !== 'input');
+    if (tab === 'stock') renderStock();
+    if (tab === 'log') renderLog();
+    window.scrollTo(0, 0);
+    saveSoon();
+  }
+
+  let toastTimer = 0;
+  function showToast(msg, label, action) {
+    $('#toast-msg').textContent = msg;
+    const b = $('#toast-act');
+    if (label && action) { b.textContent = label; b.hidden = false; b.onclick = () => { hideToast(); action(); }; }
+    else { b.hidden = true; b.onclick = null; }
+    $('#toast').hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 6000);
+  }
+  function hideToast() { $('#toast').hidden = true; }
+
+  /* ===== 操作 ===== */
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-tab],[data-seg],[data-month],[data-color],[data-act]');
+    if (!t) return;
+    if (t.dataset.tab) { switchTab(t.dataset.tab); return; }
+    if (t.dataset.seg) { state.ui.seg = t.dataset.seg; state.ui.q = ''; renderStock(); saveSoon(); return; }
+    if (t.dataset.month) { state.ui.month = t.dataset.month; renderLog(); saveSoon(); return; }
+    if (t.dataset.color) { chooseColor(t.dataset.color); return; }
+    const d = state.draft;
+    const act = t.dataset.act;
+    const b = Number(t.dataset.b);
+    const i = Number(t.dataset.i);
+    switch (act) {
+      case 'add-block': {
+        d.blocks.push(emptyBlock(d.blocks[d.blocks.length - 1]));
+        const k = d.blocks.length - 1;
+        rerenderInput('cp-' + k, 'cp-' + k);
+        break;
+      }
+      case 'del-block':
+        d.blocks.splice(b, 1);
+        d.md = d.md.filter(m => m.b !== b).map(m => ({ ...m, b: m.b > b ? m.b - 1 : m.b }));
+        rerenderInput();
+        break;
+      case 'pick-color': openColor(b, t); return;
+      case 'add-md':
+        d.md.push({ b: d.blocks.length - 1, size: 16, r: '', l: '' });
+        rerenderInput(null, 'md-' + (d.md.length - 1));
+        break;
+      case 'del-md': d.md.splice(i, 1); rerenderInput(); break;
+      case 'add-sd':
+        d.sd.push({ type: SOCK_TYPES[0], sock: d.blocks[0] ? d.blocks[0].sock : SOCKS[0].id, size: 16, count: '' });
+        rerenderInput(null, 'sd-' + (d.sd.length - 1));
+        break;
+      case 'del-sd': d.sd.splice(i, 1); rerenderInput(); break;
+      case 'cc-minus': d.cc = Math.max(0, d.cc - 1); $('#cc-val').textContent = d.cc; break;
+      case 'cc-plus': d.cc = Math.min(99, d.cc + 1); $('#cc-val').textContent = d.cc; break;
+      case 'register': openConfirm(t); return;
+      case 'commit': commit(); return;
+      case 'close-sheet': closeSheet(); return;
+      case 'reset': openSheet('sheet-reset', t); return;
+      case 'do-reset':
+        state = initState();
+        save();
+        closeSheet();
+        renderAll();
+        showToast('最初のダミーデータに戻しました。');
+        return;
+      case 'toggle-resin': state.ui.showAllResin = !state.ui.showAllResin; renderStockBody(); saveSoon(); return;
+      default: return;
+    }
+    hideErr();
+    updateSummary();
+    saveSoon();
+  });
+
+  document.addEventListener('input', e => {
+    const t = e.target;
+    if (t.id === 'cs-q') { renderColorList(); return; }
+    if (t.id === 'st-q') { state.ui.q = t.value; renderStockBody(); return; }
+    if (t.id === 'f-note') { state.draft.note = t.value; saveSoon(); return; }
+    const f = t.dataset ? t.dataset.f : null;
+    if (!f) return;
+    const d = state.draft;
+    const b = Number(t.dataset.b);
+    const i = Number(t.dataset.i);
+    if (f === 'size') { d.blocks[b].sizes[t.dataset.s] = t.value; updateBlockTotal(b); }
+    else if (f === 'resin') d.blocks[b].resin = t.value;
+    else if (f === 'md-r') d.md[i].r = t.value;
+    else if (f === 'md-l') d.md[i].l = t.value;
+    else if (f === 'sd-n') d.sd[i].count = t.value;
+    else return;
+    hideErr();
+    updateSummary();
+    saveSoon();
+  });
+
+  document.addEventListener('change', e => {
+    const t = e.target;
+    const d = state.draft;
+    if (t.id === 'f-date') { d.date = t.value; hideErr(); saveSoon(); return; }
+    if (t.id === 'f-worker') { d.worker = t.value; saveSoon(); return; }
+    const f = t.dataset ? t.dataset.f : null;
+    if (!f) return;
+    const b = Number(t.dataset.b);
+    const i = Number(t.dataset.i);
+    switch (f) {
+      case 'hinban': d.blocks[b].hinban = t.value; rerenderInput(t.id); break;
+      case 'sock': d.blocks[b].sock = t.value; break;
+      case 'md-b': d.md[i].b = Number(t.value); break;
+      case 'md-s': d.md[i].size = Number(t.value); break;
+      case 'sd-t': d.sd[i].type = t.value; break;
+      case 'sd-k': d.sd[i].sock = t.value; break;
+      case 'sd-s': d.sd[i].size = Number(t.value); break;
+      default: return;
+    }
+    updateSummary();
+    saveSoon();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.querySelector('.sheet:not([hidden])')) closeSheet();
+  });
+
+  /* ===== 起動 ===== */
+  function renderAll() {
+    renderInput();
+    switchTab(state.ui.tab);
+  }
+  function start(data) {
+    const s = data && isValid(data) ? data : (load() || initState());
+    s.ui = Object.assign(defaultUI(), s.ui || {});
+    if (!Array.isArray(s.recent)) s.recent = recentFromRecords(s.records);
+    state = s;
+    renderAll();
+  }
+  const hot = window.claude && window.claude.hot;
+  if (hot && typeof hot.snapshot === 'function') { try { hot.snapshot(() => state); } catch (e) { /* なくても動く */ } }
+  if (hot && typeof hot.ready === 'function') hot.ready(start);
+  else start(hot && hot.data);
+})();
+</script>
+
+</body>
+</html>
